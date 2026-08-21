@@ -45,18 +45,38 @@ class Field {
     this.field[0][0] = pathCharacter;
   }
 
-  // แสดงผลแผนที่ใน Terminal
+  // แสดงผลหัวข้อเกม
+  static printBanner() {
+    console.log(style.title('======================================='));
+    console.log(style.title('          🎩 FIND YOUR HAT 🎩          '));
+    console.log(style.title('======================================='));
+    console.log(style.accent(' Controls: [W] Up  [S] Down  [A] Left  [D] Right  [Q] Quit'));
+    console.log('');
+  }
+
+  // แสดงผลแผนที่ใน Terminal พร้อมีกรอบตกแต่ง
   print() {
-    const displayString = this.field
-      .map(row => row.map(char => {
+    console.clear();
+    Field.printBanner();
+
+    const width = this.field[0].length;
+    const topBorder = style.field('┌' + '──'.repeat(width) + '─┐');
+    const bottomBorder = style.field('└' + '──'.repeat(width) + '─┘');
+
+    const rows = this.field.map(row => {
+      const rowContent = row.map(char => {
         if (char === pathCharacter) return style.player(char);
         if (char === hat) return style.hat(char);
         if (char === hole) return style.hole(char);
         return style.field(char);
-      }).join(''))
-      .join('\n');
-    console.clear();
-    console.log(displayString);
+      }).join(' ');
+      return style.field('│ ') + rowContent + style.field(' │');
+    });
+
+    console.log(topBorder);
+    console.log(rows.join('\n'));
+    console.log(bottomBorder);
+    console.log('');
   }
 
   // ฟังก์ชันรับค่าและรันเกมแบบวนรอบ (Recursive)
