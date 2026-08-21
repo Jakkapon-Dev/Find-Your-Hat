@@ -29,8 +29,42 @@ class Field {
     this.y = 0;
     this.steps = 0;
 
-    // เริ่มต้นที่มุมซ้ายบน
+    // หาตำแหน่งเริ่มต้นของ Actor ที่สุ่มไว้ในแผนที่
+    this.findActorPosition();
+  }
+
+  // หาพิกัดของ Actor (*) ใน field
+  findActorPosition() {
+    for (let y = 0; y < this.field.length; y++) {
+      for (let x = 0; x < this.field[y].length; x++) {
+        if (this.field[y][x] === pathChar) {
+          this.x = x;
+          this.y = y;
+          return;
+        }
+      }
+    }
+    // ถ้าไม่มีให้เริ่มต้นที่มุมซ้ายบน
+    this.x = 0;
+    this.y = 0;
     this.field[0][0] = pathChar;
+  }
+
+  // เมธอดสำหรับการเคลื่อนที่ (Class Methods)
+  moveUp() {
+    this.y -= 1;
+  }
+
+  moveDown() {
+    this.y += 1;
+  }
+
+  moveLeft() {
+    this.x -= 1;
+  }
+
+  moveRight() {
+    this.x += 1;
   }
 
   print() {
@@ -76,16 +110,16 @@ class Field {
 
       switch (move) {
         case 'w':
-          this.y -= 1;
+          this.moveUp();
           break;
         case 's':
-          this.y += 1;
+          this.moveDown();
           break;
         case 'a':
-          this.x -= 1;
+          this.moveLeft();
           break;
         case 'd':
-          this.x += 1;
+          this.moveRight();
           break;
         default:
           console.log('Invalid input! Please press w, a, s, or d.');
@@ -97,21 +131,21 @@ class Field {
 
       // เช็คเดินตกขอบแผนที่
       if (!this.isInBounds()) {
-        console.log(`\n${colors.red}${colors.bold}Out of bounds! You lose!${colors.reset}`);
+        console.log(`\n${colors.red}${colors.bold}🚫 You went out of bounds! Game over.${colors.reset}`);
         this.askPlayAgain();
         return;
       }
 
       // เช็คเดินตกหลุม
       if (this.isHole()) {
-        console.log(`\n${colors.red}${colors.bold}Fell into a hole! Game over!${colors.reset}`);
+        console.log(`\n${colors.red}${colors.bold}💀 You fell into a hole! Game over.${colors.reset}`);
         this.askPlayAgain();
         return;
       }
 
       // เช็คเดินเจอหมวก (ชนะ)
       if (this.isHat()) {
-        console.log(`\n${colors.green}${colors.bold}Congrats! You found your hat in ${this.steps} steps!${colors.reset}`);
+        console.log(`\n${colors.green}${colors.bold}🎉 You found the hat! You win! (Total Steps: ${this.steps})${colors.reset}`);
         this.askPlayAgain();
         return;
       }
@@ -162,19 +196,24 @@ class Field {
       field.push(row);
     }
 
-    // สุ่มตำแหน่งหมวก (ไม่ให้ทับจุดเริ่ม 0,0)
+    // 1. สุ่มตำแหน่ง Actor (ผู้เล่น)
+    const actorX = Math.floor(Math.random() * width);
+    const actorY = Math.floor(Math.random() * height);
+    field[actorY][actorX] = pathChar;
+
+    // 2. สุ่มตำแหน่ง Hat (หมวก) ไม่ให้ทับกับ Actor
     let hatX, hatY;
     do {
       hatX = Math.floor(Math.random() * width);
       hatY = Math.floor(Math.random() * height);
-    } while (hatX === 0 && hatY === 0);
+    } while (hatX === actorX && hatY === actorY);
 
     field[hatY][hatX] = hat;
 
-    // สุ่มกระจายหลุมตาม % ที่กำหนด
+    // 3. สุ่มกระจายหลุม Holes (ไม่ให้ทับ Actor และ Hat)
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (x === 0 && y === 0) continue;
+        if (x === actorX && y === actorY) continue;
         if (x === hatX && y === hatY) continue;
 
         if (Math.random() < percentage) {
