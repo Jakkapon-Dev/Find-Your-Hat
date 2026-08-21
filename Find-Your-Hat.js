@@ -42,6 +42,8 @@ class Field {
     this.field = field;
     this.locationY = 0;
     this.locationX = 0;
+    this.steps = 0;
+    this.statusMessage = style.dim('Game started! Find the hat [^] while avoiding holes [O].');
     // กำหนดจุดเริ่มต้นที่มุมซ้ายบน
     this.field[0][0] = pathCharacter;
   }
@@ -62,13 +64,18 @@ class Field {
       style.field('[·] Open Path')
     );
     console.log(style.accent(' Controls: [W] Up  [S] Down  [A] Left  [D] Right  [Q] Quit'));
-    console.log('');
   }
 
-  // แสดงผลแผนที่ใน Terminal พร้อมีกรอบตกแต่ง
+  // แสดงผลแผนที่ใน Terminal พร้อมีกรอบตกแต่ง และ Dashboard
   print() {
     console.clear();
     Field.printBanner();
+
+    // แสดง Dashboard แถบสถานะ
+    const statusLine = ` 📍 Position: (X: ${this.locationX}, Y: ${this.locationY})  |  👟 Steps: ${this.steps}`;
+    console.log(style.accent(statusLine));
+    console.log(this.statusMessage);
+    console.log('');
 
     const width = this.field[0].length;
     const topBorder = style.field('┌' + '───'.repeat(width) + '─┐');
@@ -89,6 +96,7 @@ class Field {
     console.log(bottomBorder);
     console.log('');
     Field.printLegend();
+    console.log('');
   }
 
   // ฟังก์ชันรับค่าและรันเกมแบบวนรอบ (Recursive)
@@ -103,24 +111,32 @@ class Field {
         return;
       }
 
+      let moveDesc = '';
       switch (input) {
         case 'w':
           this.locationY -= 1;
+          moveDesc = 'Moved Up [W]';
           break;
         case 's':
           this.locationY += 1;
+          moveDesc = 'Moved Down [S]';
           break;
         case 'a':
           this.locationX -= 1;
+          moveDesc = 'Moved Left [A]';
           break;
         case 'd':
           this.locationX += 1;
+          moveDesc = 'Moved Right [D]';
           break;
         default:
-          console.log(style.danger('Invalid input. Please use w, a, s, d.'));
-          setTimeout(() => this.playTurn(), 1000);
+          this.statusMessage = style.danger('⚠ Invalid input! Please use W, A, S, or D.');
+          this.playTurn();
           return;
       }
+
+      this.steps += 1;
+      this.statusMessage = style.info(`✔ ${moveDesc}`);
 
       // ตรวจสอบว่าเดินชนขอบแผนที่หรือไม่
       if (!this.isInBounds()) {
