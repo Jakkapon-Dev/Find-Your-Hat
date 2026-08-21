@@ -28,12 +28,13 @@ const style = {
   accent: (text) => `${colors.cyan}${text}${colors.reset}`,
   success: (text) => `${colors.green}${colors.bold}${text}${colors.reset}`,
   danger: (text) => `${colors.red}${colors.bold}${text}${colors.reset}`,
+  dim: (text) => `${colors.dim}${text}${colors.reset}`,
   info: (text) => `${colors.cyan}${text}${colors.reset}`
 };
 
 const hat = '^';
 const hole = 'O';
-const fieldCharacter = '░';
+const fieldCharacter = '·';
 const pathCharacter = '*';
 
 class Field {
@@ -47,9 +48,19 @@ class Field {
 
   // แสดงผลหัวข้อเกม
   static printBanner() {
-    console.log(style.title('======================================='));
-    console.log(style.title('          🎩 FIND YOUR HAT 🎩          '));
-    console.log(style.title('======================================='));
+    console.log(style.title('================================================'));
+    console.log(style.title('             🎩 FIND YOUR HAT 🎩                '));
+    console.log(style.title('================================================'));
+  }
+
+  // แสดงผลคำแนะนำสัญลักษณ์ (Legend)
+  static printLegend() {
+    console.log(style.dim(' Legend: ') +
+      style.player('[*] You/Path  ') +
+      style.hat('[^] Hat (Target)  ') +
+      style.hole('[O] Hole  ') +
+      style.field('[·] Open Path')
+    );
     console.log(style.accent(' Controls: [W] Up  [S] Down  [A] Left  [D] Right  [Q] Quit'));
     console.log('');
   }
@@ -60,23 +71,24 @@ class Field {
     Field.printBanner();
 
     const width = this.field[0].length;
-    const topBorder = style.field('┌' + '──'.repeat(width) + '─┐');
-    const bottomBorder = style.field('└' + '──'.repeat(width) + '─┘');
+    const topBorder = style.field('┌' + '───'.repeat(width) + '─┐');
+    const bottomBorder = style.field('└' + '───'.repeat(width) + '─┘');
 
     const rows = this.field.map(row => {
       const rowContent = row.map(char => {
-        if (char === pathCharacter) return style.player(char);
-        if (char === hat) return style.hat(char);
-        if (char === hole) return style.hole(char);
-        return style.field(char);
-      }).join(' ');
-      return style.field('│ ') + rowContent + style.field(' │');
+        if (char === pathCharacter) return style.player(` ${char} `);
+        if (char === hat) return style.hat(` ${char} `);
+        if (char === hole) return style.hole(` ${char} `);
+        return style.field(` ${char} `);
+      }).join('');
+      return style.field('│') + rowContent + style.field('│');
     });
 
     console.log(topBorder);
     console.log(rows.join('\n'));
     console.log(bottomBorder);
     console.log('');
+    Field.printLegend();
   }
 
   // ฟังก์ชันรับค่าและรันเกมแบบวนรอบ (Recursive)
