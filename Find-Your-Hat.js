@@ -5,13 +5,13 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-// Game characters
+// สัญลักษณ์ในเกม
 const hat = '^';
 const hole = 'O';
 const fieldChar = '·';
 const pathChar = '*';
 
-// ANSI colors for console styling
+// รหัสสี ANSI สำหรับแต่งข้อความใน Terminal
 const colors = {
   reset: '\x1b[0m',
   cyan: '\x1b[36m',
@@ -29,7 +29,7 @@ class Field {
     this.y = 0;
     this.steps = 0;
 
-    // Start at top-left corner
+    // เริ่มต้นที่มุมซ้ายบน
     this.field[0][0] = pathChar;
   }
 
@@ -95,28 +95,28 @@ class Field {
 
       this.steps++;
 
-      // Check boundaries
+      // เช็คเดินตกขอบแผนที่
       if (!this.isInBounds()) {
         console.log(`\n${colors.red}${colors.bold}Out of bounds! You lose!${colors.reset}`);
         this.askPlayAgain();
         return;
       }
 
-      // Check hole
+      // เช็คเดินตกหลุม
       if (this.isHole()) {
         console.log(`\n${colors.red}${colors.bold}Fell into a hole! Game over!${colors.reset}`);
         this.askPlayAgain();
         return;
       }
 
-      // Check hat
+      // เช็คเดินเจอหมวก (ชนะ)
       if (this.isHat()) {
         console.log(`\n${colors.green}${colors.bold}Congrats! You found your hat in ${this.steps} steps!${colors.reset}`);
         this.askPlayAgain();
         return;
       }
 
-      // Mark visited path and continue
+      // บันทึกทางที่เดินผ่านมาแล้วเดินรอบถัดไป
       this.field[this.y][this.x] = pathChar;
       this.playTurn();
     });
@@ -162,7 +162,7 @@ class Field {
       field.push(row);
     }
 
-    // Place hat (random location other than 0,0)
+    // สุ่มตำแหน่งหมวก (ไม่ให้ทับจุดเริ่ม 0,0)
     let hatX, hatY;
     do {
       hatX = Math.floor(Math.random() * width);
@@ -171,7 +171,7 @@ class Field {
 
     field[hatY][hatX] = hat;
 
-    // Fill holes based on percentage
+    // สุ่มกระจายหลุมตาม % ที่กำหนด
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         if (x === 0 && y === 0) continue;
@@ -187,6 +187,6 @@ class Field {
   }
 }
 
-// Start game
+// เริ่มต้นเกม
 const myField = new Field(Field.generateField(10, 10, 0.2));
 myField.playTurn();
