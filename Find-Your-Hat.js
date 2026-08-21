@@ -6,6 +6,31 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+const colors = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  cyan: '\x1b[36m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+  magenta: '\x1b[35m',
+  blue: '\x1b[34m',
+  gray: '\x1b[90m',
+};
+
+const style = {
+  player: (text) => `${colors.cyan}${colors.bold}${text}${colors.reset}`,
+  hat: (text) => `${colors.yellow}${colors.bold}${text}${colors.reset}`,
+  hole: (text) => `${colors.red}${text}${colors.reset}`,
+  field: (text) => `${colors.gray}${text}${colors.reset}`,
+  title: (text) => `${colors.magenta}${colors.bold}${text}${colors.reset}`,
+  accent: (text) => `${colors.cyan}${text}${colors.reset}`,
+  success: (text) => `${colors.green}${colors.bold}${text}${colors.reset}`,
+  danger: (text) => `${colors.red}${colors.bold}${text}${colors.reset}`,
+  info: (text) => `${colors.cyan}${text}${colors.reset}`
+};
+
 const hat = '^';
 const hole = 'O';
 const fieldCharacter = '░';
@@ -23,7 +48,12 @@ class Field {
   // แสดงผลแผนที่ใน Terminal
   print() {
     const displayString = this.field
-      .map(row => row.join(''))
+      .map(row => row.map(char => {
+        if (char === pathCharacter) return style.player(char);
+        if (char === hat) return style.hat(char);
+        if (char === hole) return style.hole(char);
+        return style.field(char);
+      }).join(''))
       .join('\n');
     console.clear();
     console.log(displayString);
@@ -32,11 +62,11 @@ class Field {
   // ฟังก์ชันรับค่าและรันเกมแบบวนรอบ (Recursive)
   playTurn() {
     this.print();
-    rl.question('Move (w/a/s/d, q to quit): ', (answer) => {
+    rl.question(style.info('Move (w/a/s/d, q to quit): '), (answer) => {
       const input = answer.trim().toLowerCase();
 
       if (input === 'q') {
-        console.log('Exiting game...');
+        console.log(style.info('Exiting game... Goodbye!'));
         rl.close();
         return;
       }
@@ -55,28 +85,28 @@ class Field {
           this.locationX += 1;
           break;
         default:
-          console.log('Invalid input. Please use w, a, s, d.');
+          console.log(style.danger('Invalid input. Please use w, a, s, d.'));
           setTimeout(() => this.playTurn(), 1000);
           return;
       }
 
       // ตรวจสอบว่าเดินชนขอบแผนที่หรือไม่
       if (!this.isInBounds()) {
-        console.log('Out of bounds! You lose!');
+        console.log(style.danger('Out of bounds! You lose!'));
         rl.close();
         return;
       }
 
       // ตรวจสอบว่าตกหลุมหรือไม่
       if (this.isHole()) {
-        console.log('Oops, you fell in a hole! Game Over!');
+        console.log(style.danger('Oops, you fell in a hole! Game Over!'));
         rl.close();
         return;
       }
 
       // ตรวจสอบว่าเจอหมวกหรือยัง
       if (this.isHat()) {
-        console.log('Congratulations, you found your hat!');
+        console.log(style.success('Congratulations, you found your hat!'));
         rl.close();
         return;
       }
