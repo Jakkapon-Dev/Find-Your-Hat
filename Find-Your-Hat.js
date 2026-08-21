@@ -140,22 +140,19 @@ class Field {
 
       // ตรวจสอบว่าเดินชนขอบแผนที่หรือไม่
       if (!this.isInBounds()) {
-        console.log(style.danger('Out of bounds! You lose!'));
-        rl.close();
+        this.printGameOverScreen('You stepped out of bounds!');
         return;
       }
 
       // ตรวจสอบว่าตกหลุมหรือไม่
       if (this.isHole()) {
-        console.log(style.danger('Oops, you fell in a hole! Game Over!'));
-        rl.close();
+        this.printGameOverScreen('You fell into a dark hole!');
         return;
       }
 
       // ตรวจสอบว่าเจอหมวกหรือยัง
       if (this.isHat()) {
-        console.log(style.success('Congratulations, you found your hat!'));
-        rl.close();
+        this.printVictoryScreen();
         return;
       }
 
@@ -164,6 +161,44 @@ class Field {
 
       // วนลูปเล่นตาต่อไป
       this.playTurn();
+    });
+  }
+
+  // แสดงผลหน้าจอชนะเกม
+  printVictoryScreen() {
+    console.clear();
+    console.log(style.success('================================================'));
+    console.log(style.success('    🎉 CONGRATULATIONS! YOU FOUND YOUR HAT! 🎉  '));
+    console.log(style.success('================================================'));
+    console.log(style.player(`  🏆 Total Steps Taken: ${this.steps}`));
+    console.log(style.title(`  🎩 You are a Master Hat Finder!`));
+    console.log('');
+    Field.askPlayAgain();
+  }
+
+  // แสดงผลหน้าจอแพ้เกม
+  printGameOverScreen(reason) {
+    console.clear();
+    console.log(style.danger('================================================'));
+    console.log(style.danger('             💀 GAME OVER 💀                    '));
+    console.log(style.danger('================================================'));
+    console.log(style.danger(`  ❌ ${reason}`));
+    console.log(style.dim(`  👟 Steps survived: ${this.steps}`));
+    console.log('');
+    Field.askPlayAgain();
+  }
+
+  // ถามผู้เล่นว่าต้องการเล่นใหม่อีกครั้งหรือไม่
+  static askPlayAgain() {
+    rl.question(style.info('Play again? (y/n): '), (answer) => {
+      const input = answer.trim().toLowerCase();
+      if (input === 'y' || input === 'yes') {
+        const newGame = new Field(Field.generateField(10, 10, 0.2));
+        newGame.playTurn();
+      } else {
+        console.log(style.title('\nThanks for playing Find Your Hat! See you next time! 👋\n'));
+        rl.close();
+      }
     });
   }
 
